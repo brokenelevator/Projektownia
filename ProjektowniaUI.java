@@ -6,11 +6,15 @@ import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.concurrent.Semaphore;
 import java.util.Random;
+import java.util.LinkedList;
 
-class Projektownia extends JFrame
+class ProjektowniaUI extends JFrame
 {
+private Projektownia company = new Projektownia();
 private JPanel controlPanel = new JPanel();
 private JPanel eventsPanel = new JPanel();
 private JPanel emploeeNorthPanel = new JPanel();
@@ -25,10 +29,8 @@ private JLabel newProjectSizeLabel = new JLabel("# of people needed:");
 private JLabel newProjectTimeLabel = new JLabel("Required time(in s):");
 private JButton newEmploeeButton = new JButton("Spawn");
 private JButton newProjectButton = new JButton("Construct project");
-private Semaphore oldEmploeeApplications  = new Semaphore(0, true);
-private Semaphore candidateApplications = new Semaphore(0, true);
 
-Projektownia()
+ProjektowniaUI()
 	{
 	super("Projektownia");
 	setSize(500, 640);
@@ -52,6 +54,7 @@ Projektownia()
 	emploeeNorthPanel.add(newEmploeeLabel);
 	emploeeNorthPanel.add(newEmploeeTextField);
 	emploeeSouthPanel.add(newEmploeeButton);
+	newEmploeeButton.addActionListener(new ConjurePeople());
 	projectNorthPanel.add(newProjectSizeLabel);
 	projectNorthPanel.add(newProjectSizeTextField);
 	projectNorthPanel.add(newProjectTimeLabel);
@@ -59,15 +62,52 @@ Projektownia()
 	projectSouthPanel.add(newProjectButton);
 	}
 
+class ConjurePeople implements ActionListener
+	{
+	short peopleCount = 0;
+	
+	public void actionPerformed(ActionEvent event)
+		{
+		if(!newEmploeeTextField.getText().matches("^[0-9]{1,3}$")) //input consists of 1-3 digits
+			{
+			newEmploeeTextField.setText("0");
+			return;
+			}
+		short counter = Short.parseShort(newEmploeeTextField.getText());
+		for(;counter > 0;counter--)
+			{
+			peopleCount++;
+			new Person("Person " + peopleCount, company, company.getCandidateQueue()).start();
+			}
+		}
+	}
+
+public static void main(String[] args)
+	{
+	ProjektowniaUI mainWindow = new ProjektowniaUI();
+	mainWindow.setVisible(true);
+	}
+}
+
+class Projektownia
+{
+private Semaphore oldEmploeeApplications  = new Semaphore(0, true);
+private Semaphore candidateApplications = new Semaphore(0, true);
+private LinkedList<Person> availableEmploees = new LinkedList<Person>();
+
 Semaphore getOldEmploeeQueue()
 	{
 	return oldEmploeeApplications;
 	}
 
-public static void main(String[] args)
+Semaphore getCandidateQueue()
 	{
-	Projektownia mainWindow = new Projektownia();
-	mainWindow.setVisible(true);
+	return candidateApplications;
+	}
+
+LinkedList<Person> getAvailableEmploeesList()
+	{
+	return availableEmploees;
 	}
 }
 
@@ -87,6 +127,7 @@ Person(String id, Projektownia company, Semaphore offer)
 
 public void run()
 	{
+	System.out.println(name + ". Ready for action.");
 	while(true)
 		{
 		try
@@ -97,6 +138,7 @@ public void run()
 			{
 			return;
 			}
+		employer.getAvailableEmploeesList().addLast(this); //announce you are ready
 		while(!assigned)
 			{
 			try
