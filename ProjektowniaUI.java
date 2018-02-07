@@ -5,6 +5,7 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.BorderFactory;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -163,6 +164,7 @@ class ProjectPanel
 		peopleResignedLabelValue = new JLabel("" + project.getPeopleResigned());
 		peopleResignedLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
 		peopleResignedLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		mainPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
 		mainPanel.setLayout(new GridLayout(8,1));
 		mainPanel.add(nameLabel);
 		mainPanel.add(progressBarDummy);
@@ -398,7 +400,14 @@ public void run()
 					}
 				catch(InterruptedException e){}
 				Person current = company.getAvailableEmploeesList().pollFirst();
-				current.assigned = true;
+				try
+					{
+					current.assigned = true;
+					}
+				catch(NullPointerException e)
+					{
+					continue;
+					}
 				team.addLast(current);
 				hiredTotal++;
 				continue;
@@ -412,7 +421,14 @@ public void run()
 					}
 				catch(InterruptedException e){}
 				Person current = company.getAvailableEmploeesList().pollFirst();
-				current.assigned = true;
+				try
+					{
+					current.assigned = true;
+					}
+				catch(NullPointerException e)
+					{
+					continue;
+					}
 				team.addLast(current);
 				hiredTotal++;
 				continue;
