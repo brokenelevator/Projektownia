@@ -220,7 +220,7 @@ public void run()
 				sleep(900); //wait to complete assignment
 				}
 			catch(InterruptedException e){}
-			if(rand.nextInt(1000) < 11) //one percent chance to resign during project for every iteration
+			if(rand.nextInt(10000) < 11) //one tenth percent chance to resign during project for every iteration
 				{
 				assigned = false;
 				return;
@@ -294,11 +294,14 @@ public void run()
 			for(Iterator<Person> it = team.iterator(); it.hasNext();)
 				{
 				Person current = it.next();
-				if(current == null)
+				try
 					{
-					it.remove();
+					if(!current.assigned)
+						{
+						it.remove();
+						}
 					}
-				if(!current.assigned)
+				catch(NullPointerException e)
 					{
 					it.remove();
 					}
