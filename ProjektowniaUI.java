@@ -33,7 +33,7 @@ private JLabel newProjectSizeLabel = new JLabel("# of people needed:");
 private JLabel newProjectTimeLabel = new JLabel("Required time(in s):");
 private JLabel oldEmploeesCountLabel = new JLabel("Old emploees waiting for a new project:");
 private JLabel oldEmploeesCountValueLabel = new JLabel("0");
-private JLabel candidateCountLabel = new JLabel("New candidates waiting a job:");
+private JLabel candidateCountLabel = new JLabel("New candidates waiting for a job:");
 private JLabel candidateCountValueLabel = new JLabel("0");
 private JButton newEmploeeButton = new JButton("Spawn");
 private JButton newProjectButton = new JButton("Construct project");
@@ -193,7 +193,6 @@ Person(String id, Projektownia company, Semaphore offer)
 
 public void run()
 	{
-	System.out.println(name + ". Ready for action.");
 	while(true)
 		{
 		try
@@ -246,6 +245,7 @@ class Project extends Thread
 private String name;
 private short timeRequired;
 private short peopleRequired;
+private short timeRemaining;
 private Projektownia company;
 private LinkedList<Person> team = new LinkedList<Person>();
 
@@ -253,16 +253,41 @@ Project(String id, short time, short people, Projektownia owner)
 	{
 	name = id;
 	timeRequired = time;
+	timeRemaining = timeRequired;
 	peopleRequired = people;
 	company = owner;
+	}
+
+short getTimeRemaining()
+	{
+	return timeRemaining;
+	}
+
+short getTimeRequired()
+	{
+	return timeRequired;
+	}
+
+short getPeopleRequired()
+	{
+	return peopleRequired;
+	}
+
+short getPeopleAvailable()
+	{
+	return (short)team.size();
+	}
+
+String fetchName()
+	{
+	return name;
 	}
 
 public void run()
 	{
 	Semaphore oldEmploeeList = company.getOldEmploeeQueue();
 	Semaphore candidateList = company.getCandidateQueue();
-	//System.out.println(name + ". Prepare for liftoff.");
-	while(true)
+	while(timeRemaining > 0)
 		{
 		if(team.size() == peopleRequired)
 			{
@@ -272,12 +297,10 @@ public void run()
 				if(current == null)
 					{
 					it.remove();
-					//System.out.println(name + ". Null - removing: " + current.fetchName());
 					}
 				if(!current.assigned)
 					{
 					it.remove();
-					//System.out.println(name + ". Unassigned - removing: " + current.fetchName());
 					}
 				}
 			}
@@ -318,8 +341,18 @@ public void run()
 				catch(InterruptedException e){}
 				}
 			}
-		//System.out.println(name + ". LIFTOFF.");
-		//return;
+		try
+			{
+			sleep(1000);
+			}
+		catch(InterruptedException e){}
+		timeRemaining--;
+		}
+	for(Iterator<Person> it = team.iterator(); it.hasNext();)
+		{
+		Person current = it.next();
+		if(current == null) continue;
+		current.assigned = false;
 		}
 	}
 }
