@@ -178,11 +178,11 @@ public void run()
 				sleep(900); //wait to complete assignment
 				}
 			catch(InterruptedException e){}
-			// if(rand.nextInt(100) < 11) //one in ten resigns during project
-				// {
-				// assigned = false;
-				// return;
-				// }
+			if(rand.nextInt(1000) < 11) //one percent chance to resign during project for every iteration
+				{
+				assigned = false;
+				return;
+				}
 			}
 		if(rand.nextInt(100) < 50) //half stays for another project
 			{
@@ -218,9 +218,9 @@ public void run()
 	{
 	Semaphore oldEmploeeList = company.getOldEmploeeQueue();
 	Semaphore candidateList = company.getCandidateQueue();
+	//System.out.println(name + ". Prepare for liftoff.");
 	while(true)
 		{
-		System.out.println(name + ". Prepare for liftoff.");
 		if(team.size() == peopleRequired)
 			{
 			for(Iterator<Person> it = team.iterator(); it.hasNext();)
@@ -229,12 +229,12 @@ public void run()
 				if(current == null)
 					{
 					it.remove();
-					System.out.println("Null - removing: " + current.fetchName());
+					//System.out.println(name + ". Null - removing: " + current.fetchName());
 					}
 				if(!current.assigned)
 					{
 					it.remove();
-					System.out.println("Unassigned - removing: " + current.fetchName());
+					//System.out.println(name + ". Unassigned - removing: " + current.fetchName());
 					}
 				}
 			}
@@ -275,8 +275,8 @@ public void run()
 				catch(InterruptedException e){}
 				}
 			}
-		System.out.println(name + ". LIFTOFF.");
-		return;
+		//System.out.println(name + ". LIFTOFF.");
+		//return;
 		}
 	}
 }
