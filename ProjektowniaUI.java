@@ -31,12 +31,13 @@ private JTextField newProjectTimeTextField = new JTextField("0");
 private JLabel newEmploeeLabel = new JLabel("# of people:");
 private JLabel newProjectSizeLabel = new JLabel("# of people needed:");
 private JLabel newProjectTimeLabel = new JLabel("Required time(in s):");
-private JLabel oldEmploeesCountLabel = new JLabel("Old emploees waiting for a new project:");
+private JLabel oldEmploeesCountLabel = new JLabel("Old emploees waiting for a new project");
 private JLabel oldEmploeesCountValueLabel = new JLabel("0");
-private JLabel candidateCountLabel = new JLabel("New candidates waiting for a job:");
+private JLabel candidateCountLabel = new JLabel("New candidates waiting for a job");
 private JLabel candidateCountValueLabel = new JLabel("0");
 private JButton newEmploeeButton = new JButton("Spawn");
 private JButton newProjectButton = new JButton("Construct project");
+private LinkedList<ProjectPanel> projectPanelList = new LinkedList<ProjectPanel>();
 
 ProjektowniaUI()
 	{
@@ -51,13 +52,13 @@ ProjektowniaUI()
 	eventsPanel.add(innerEventsPanel, BorderLayout.CENTER);
 	queueInfoPanel.setLayout(new GridLayout(2,2));
 	queueInfoPanel.add(oldEmploeesCountValueLabel);
-	oldEmploeesCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	oldEmploeesCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(candidateCountValueLabel);
-	candidateCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	candidateCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(oldEmploeesCountLabel);
-	oldEmploeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	oldEmploeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(candidateCountLabel);
-	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	innerEventsPanel.setLayout(new GridLayout(4,2));
 	controlPanel.setLayout(new GridLayout(2,2));
 	controlPanel.add(emploeeNorthPanel);
@@ -85,7 +86,7 @@ ProjektowniaUI()
 
 class ConjurePeople implements ActionListener
 	{
-	short peopleCount = 0;
+	private short peopleCount = 0;
 	
 	public void actionPerformed(ActionEvent event)
 		{
@@ -105,7 +106,7 @@ class ConjurePeople implements ActionListener
 
 class ConjureProject implements ActionListener
 	{
-	short projectCount = 0;
+	private short projectCount = 0;
 	
 	public void actionPerformed(ActionEvent event)
 		{
@@ -120,7 +121,60 @@ class ConjureProject implements ActionListener
 			return;
 			}
 		projectCount++;
-		new Project("Project " + projectCount, Short.parseShort(newProjectTimeTextField.getText()), Short.parseShort(newProjectSizeTextField.getText()), company).start();
+		Project project = new Project("Project " + projectCount, Short.parseShort(newProjectTimeTextField.getText()), Short.parseShort(newProjectSizeTextField.getText()), company);
+		project.start();
+		ProjectPanel panel = new ProjectPanel(project);
+		innerEventsPanel.add(panel.getMainPanel());
+		innerEventsPanel.validate();
+		projectPanelList.addLast(panel);
+		}
+	}
+
+class ProjectPanel
+	{
+	private Project project;
+	private String projectName;
+	private short peopleRequired;
+	private short timeRequired;
+	private JPanel mainPanel = new JPanel();
+	private JLabel nameLabel;
+	private JLabel progressBarDummy = new JLabel("");
+	private JLabel peopleRequiredLabel = new JLabel("People required");;
+	private JLabel peopleRequiredLabelValue;
+	private JLabel peopleAvailableLabel = new JLabel("People available");;
+	private JLabel peopleAvailableLabelValue;
+	
+	ProjectPanel(Project project)
+		{
+		this.project = project;
+		projectName = project.fetchName();
+		peopleRequired = project.getPeopleRequired();
+		timeRequired = project.getTimeRequired();
+		nameLabel = new JLabel(projectName);
+		nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		peopleRequiredLabelValue = new JLabel("" + peopleRequired);
+		peopleRequiredLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
+		peopleRequiredLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		peopleAvailableLabelValue = new JLabel("" + project.getPeopleAvailable());
+		peopleAvailableLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
+		peopleAvailableLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		mainPanel.setLayout(new GridLayout(6,1));
+		mainPanel.add(nameLabel);
+		mainPanel.add(progressBarDummy);
+		mainPanel.add(peopleRequiredLabelValue);
+		mainPanel.add(peopleRequiredLabel);
+		mainPanel.add(peopleAvailableLabelValue);
+		mainPanel.add(peopleAvailableLabel);
+		}
+
+	JPanel getMainPanel()
+		{
+		return mainPanel;
+		}
+
+	void updatePeopleAvailableLabelValue()
+		{
+		peopleAvailableLabelValue.setText("" + project.getPeopleAvailable());
 		}
 	}
 
@@ -136,6 +190,12 @@ void updateUI()
 					{
 					oldEmploeesCountValueLabel.setText(Integer.toString(company.getOldEmploeeQueue().getQueueLength()));
 					candidateCountValueLabel.setText(Integer.toString(company.getCandidateQueue().getQueueLength()));
+					for(Iterator<ProjectPanel> it = projectPanelList.iterator(); it.hasNext();)
+						{
+						ProjectPanel current = it.next();
+						//if time is up throw away the panel
+						current.updatePeopleAvailableLabelValue();
+						}
 					}
 				}
 			);
