@@ -4,6 +4,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -18,6 +19,8 @@ class ProjektowniaUI extends JFrame
 private Projektownia company = new Projektownia();
 private JPanel controlPanel = new JPanel();
 private JPanel eventsPanel = new JPanel();
+private JPanel innerEventsPanel = new JPanel();
+private JPanel queueInfoPanel = new JPanel();
 private JPanel emploeeNorthPanel = new JPanel();
 private JPanel emploeeSouthPanel = new JPanel();
 private JPanel projectNorthPanel = new JPanel();
@@ -28,6 +31,10 @@ private JTextField newProjectTimeTextField = new JTextField("0");
 private JLabel newEmploeeLabel = new JLabel("# of people:");
 private JLabel newProjectSizeLabel = new JLabel("# of people needed:");
 private JLabel newProjectTimeLabel = new JLabel("Required time(in s):");
+private JLabel oldEmploeesCountLabel = new JLabel("Old emploees waiting for a new project:");
+private JLabel oldEmploeesCountValueLabel = new JLabel("0");
+private JLabel candidateCountLabel = new JLabel("New candidates waiting a job:");
+private JLabel candidateCountValueLabel = new JLabel("0");
 private JButton newEmploeeButton = new JButton("Spawn");
 private JButton newProjectButton = new JButton("Construct project");
 
@@ -39,7 +46,19 @@ ProjektowniaUI()
 	setLayout(new BorderLayout());
 	add(eventsPanel, BorderLayout.CENTER);
 	add(controlPanel, BorderLayout.SOUTH);
-	eventsPanel.setLayout(new GridLayout(4,2));
+	eventsPanel.setLayout(new BorderLayout());
+	eventsPanel.add(queueInfoPanel, BorderLayout.SOUTH);
+	eventsPanel.add(innerEventsPanel, BorderLayout.CENTER);
+	queueInfoPanel.setLayout(new GridLayout(2,2));
+	queueInfoPanel.add(oldEmploeesCountValueLabel);
+	oldEmploeesCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	queueInfoPanel.add(candidateCountValueLabel);
+	candidateCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	queueInfoPanel.add(oldEmploeesCountLabel);
+	oldEmploeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	queueInfoPanel.add(candidateCountLabel);
+	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
+	innerEventsPanel.setLayout(new GridLayout(4,2));
 	controlPanel.setLayout(new GridLayout(2,2));
 	controlPanel.add(emploeeNorthPanel);
 	controlPanel.add(projectNorthPanel);
@@ -105,10 +124,34 @@ class ConjureProject implements ActionListener
 		}
 	}
 
+void updateUI()
+	{
+	while(true)
+		{
+		SwingUtilities.invokeLater
+			(
+			new Runnable()
+				{
+				public void run()
+					{
+					oldEmploeesCountValueLabel.setText(Integer.toString(company.getOldEmploeeQueue().getQueueLength()));
+					candidateCountValueLabel.setText(Integer.toString(company.getCandidateQueue().getQueueLength()));
+					}
+				}
+			);
+		try
+			{
+			Thread.sleep(500);
+			}
+		catch(InterruptedException e){}
+		}
+	}
+
 public static void main(String[] args)
 	{
 	ProjektowniaUI mainWindow = new ProjektowniaUI();
 	mainWindow.setVisible(true);
+	mainWindow.updateUI();
 	}
 }
 
