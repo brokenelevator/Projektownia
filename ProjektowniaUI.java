@@ -139,10 +139,12 @@ class ProjectPanel
 	private JPanel mainPanel = new JPanel();
 	private JLabel nameLabel;
 	private JLabel progressBarDummy = new JLabel("");
-	private JLabel peopleRequiredLabel = new JLabel("People required");;
+	private JLabel peopleRequiredLabel = new JLabel("People required");
 	private JLabel peopleRequiredLabelValue;
-	private JLabel peopleAvailableLabel = new JLabel("People available");;
+	private JLabel peopleAvailableLabel = new JLabel("People available");
 	private JLabel peopleAvailableLabelValue;
+	private JLabel peopleResignedLabel = new JLabel("People resigned");
+	private JLabel peopleResignedLabelValue;
 	
 	ProjectPanel(Project project)
 		{
@@ -158,13 +160,18 @@ class ProjectPanel
 		peopleAvailableLabelValue = new JLabel("" + project.getPeopleAvailable());
 		peopleAvailableLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
 		peopleAvailableLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		mainPanel.setLayout(new GridLayout(6,1));
+		peopleResignedLabelValue = new JLabel("" + project.getPeopleResigned());
+		peopleResignedLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
+		peopleResignedLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		mainPanel.setLayout(new GridLayout(8,1));
 		mainPanel.add(nameLabel);
 		mainPanel.add(progressBarDummy);
 		mainPanel.add(peopleRequiredLabelValue);
 		mainPanel.add(peopleRequiredLabel);
 		mainPanel.add(peopleAvailableLabelValue);
 		mainPanel.add(peopleAvailableLabel);
+		mainPanel.add(peopleResignedLabelValue);
+		mainPanel.add(peopleResignedLabel);
 		}
 
 	JPanel getMainPanel()
@@ -175,6 +182,11 @@ class ProjectPanel
 	void updatePeopleAvailableLabelValue()
 		{
 		peopleAvailableLabelValue.setText("" + project.getPeopleAvailable());
+		}
+
+	void updatePeopleResignedLabelValue()
+		{
+		peopleResignedLabelValue.setText("" + project.getPeopleResigned());
 		}
 	}
 
@@ -195,6 +207,7 @@ void updateUI()
 						ProjectPanel current = it.next();
 						//if time is up throw away the panel
 						current.updatePeopleAvailableLabelValue();
+						current.updatePeopleResignedLabelValue();
 						}
 					}
 				}
@@ -306,6 +319,7 @@ private String name;
 private short timeRequired;
 private short peopleRequired;
 private short timeRemaining;
+private short hiredTotal;
 private Projektownia company;
 private LinkedList<Person> team = new LinkedList<Person>();
 
@@ -338,6 +352,11 @@ short getPeopleAvailable()
 	return (short)team.size();
 	}
 
+short getPeopleResigned()
+	{
+	return (short)(hiredTotal - getPeopleAvailable());
+	}
+
 String fetchName()
 	{
 	return name;
@@ -347,6 +366,7 @@ public void run()
 	{
 	Semaphore oldEmploeeList = company.getOldEmploeeQueue();
 	Semaphore candidateList = company.getCandidateQueue();
+	hiredTotal = 0;
 	while(timeRemaining > 0)
 		{
 		if(team.size() == peopleRequired)
@@ -380,6 +400,7 @@ public void run()
 				Person current = company.getAvailableEmploeesList().pollFirst();
 				current.assigned = true;
 				team.addLast(current);
+				hiredTotal++;
 				continue;
 				}
 			if(candidateList.hasQueuedThreads())
@@ -393,6 +414,7 @@ public void run()
 				Person current = company.getAvailableEmploeesList().pollFirst();
 				current.assigned = true;
 				team.addLast(current);
+				hiredTotal++;
 				continue;
 				}
 			else
