@@ -3,6 +3,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
+import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.BorderFactory;
@@ -164,13 +165,12 @@ class ProjectPanel
 	private short timeRequired;
 	private JPanel mainPanel = new JPanel();
 	private JLabel nameLabel;
-	private JLabel progressBarDummy = new JLabel("");
-	private JLabel peopleRequiredLabel = new JLabel("People required");
-	private JLabel peopleRequiredLabelValue;
-	private JLabel peopleAvailableLabel = new JLabel("People available");
-	private JLabel peopleAvailableLabelValue;
+	private JLabel timeProgressBarLabel = new JLabel("Work Progress");
+	private JLabel peopleProgressBarLabel = new JLabel("Team Status");
 	private JLabel peopleResignedLabel = new JLabel("People resigned");
 	private JLabel peopleResignedLabelValue;
+	private JProgressBar peopleStatus = new JProgressBar();
+	private JProgressBar timeStatus = new JProgressBar();
 	
 	ProjectPanel(Project project)
 		{
@@ -180,23 +180,28 @@ class ProjectPanel
 		timeRequired = project.getTimeRequired();
 		nameLabel = new JLabel(projectName);
 		nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		peopleRequiredLabelValue = new JLabel("" + peopleRequired);
-		peopleRequiredLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
-		peopleRequiredLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		peopleAvailableLabelValue = new JLabel("" + project.getPeopleAvailable());
-		peopleAvailableLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
-		peopleAvailableLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		timeProgressBarLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		timeStatus.setMinimum(0);
+		timeStatus.setMaximum(timeRequired);
+		timeStatus.setValue(0);
+		timeStatus.setStringPainted(true);
+		peopleStatus.setMinimum(0);
+		peopleStatus.setMaximum(peopleRequired);
+		short peopleAvailable = project.getPeopleAvailable();
+		peopleStatus.setValue(peopleAvailable);
+		peopleStatus.setString(peopleAvailable + "/" + peopleRequired);
+		peopleStatus.setStringPainted(true);
+		peopleProgressBarLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		peopleResignedLabelValue = new JLabel("" + project.getPeopleResigned());
 		peopleResignedLabelValue.setHorizontalAlignment(SwingConstants.CENTER);
 		peopleResignedLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		mainPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
-		mainPanel.setLayout(new GridLayout(8,1));
+		mainPanel.setLayout(new GridLayout(7,1));
 		mainPanel.add(nameLabel);
-		mainPanel.add(progressBarDummy);
-		mainPanel.add(peopleRequiredLabelValue);
-		mainPanel.add(peopleRequiredLabel);
-		mainPanel.add(peopleAvailableLabelValue);
-		mainPanel.add(peopleAvailableLabel);
+		mainPanel.add(timeStatus);
+		mainPanel.add(timeProgressBarLabel);
+		mainPanel.add(peopleStatus);
+		mainPanel.add(peopleProgressBarLabel);
 		mainPanel.add(peopleResignedLabelValue);
 		mainPanel.add(peopleResignedLabel);
 		}
@@ -206,14 +211,21 @@ class ProjectPanel
 		return mainPanel;
 		}
 
-	void updatePeopleAvailableLabelValue()
-		{
-		peopleAvailableLabelValue.setText("" + project.getPeopleAvailable());
-		}
-
 	void updatePeopleResignedLabelValue()
 		{
 		peopleResignedLabelValue.setText("" + project.getPeopleResigned());
+		}
+	
+	void updatePeopleStatusBar()
+		{
+		short peopleAvailable = project.getPeopleAvailable();
+		peopleStatus.setValue(peopleAvailable);
+		peopleStatus.setString(peopleAvailable + "/" + peopleRequired);
+		}
+
+	void updateTimeStatusBar()
+		{
+		timeStatus.setValue(timeRequired - project.getTimeRemaining());
 		}
 	}
 
@@ -232,7 +244,8 @@ void updateUI()
 					for(Iterator<ProjectPanel> it = projectPanelList.iterator(); it.hasNext();)
 						{
 						ProjectPanel current = it.next();
-						current.updatePeopleAvailableLabelValue();
+						current.updatePeopleStatusBar();
+						current.updateTimeStatusBar();
 						current.updatePeopleResignedLabelValue();
 						}
 					}
