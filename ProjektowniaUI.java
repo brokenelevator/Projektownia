@@ -21,6 +21,7 @@ private Projektownia company = new Projektownia();
 private JPanel controlPanel = new JPanel();
 private JPanel eventsPanel = new JPanel();
 private JPanel innerEventsPanel = new JPanel();
+private JPanel innerControlPanel = new JPanel();
 private JPanel queueInfoPanel = new JPanel();
 private JPanel emploeeNorthPanel = new JPanel();
 private JPanel emploeeSouthPanel = new JPanel();
@@ -38,6 +39,7 @@ private JLabel candidateCountLabel = new JLabel("New candidates waiting for a jo
 private JLabel candidateCountValueLabel = new JLabel("0");
 private JButton newEmploeeButton = new JButton("Spawn");
 private JButton newProjectButton = new JButton("Construct project");
+private JButton clearCompletedButton = new JButton("Clear completed");
 private LinkedList<ProjectPanel> projectPanelList = new LinkedList<ProjectPanel>();
 
 ProjektowniaUI()
@@ -59,13 +61,17 @@ ProjektowniaUI()
 	queueInfoPanel.add(oldEmploeesCountLabel);
 	oldEmploeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(candidateCountLabel);
-	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
 	innerEventsPanel.setLayout(new GridLayout(4,2));
-	controlPanel.setLayout(new GridLayout(2,2));
-	controlPanel.add(emploeeNorthPanel);
-	controlPanel.add(projectNorthPanel);
-	controlPanel.add(emploeeSouthPanel);
-	controlPanel.add(projectSouthPanel);
+	controlPanel.setLayout(new BorderLayout());
+	controlPanel.add(innerControlPanel, BorderLayout.NORTH);
+	controlPanel.add(clearCompletedButton, BorderLayout.SOUTH);
+	clearCompletedButton.addActionListener(new ClearCompletedHandler());
+	innerControlPanel.setLayout(new GridLayout(2,2));
+	innerControlPanel.add(emploeeNorthPanel);
+	innerControlPanel.add(projectNorthPanel);
+	innerControlPanel.add(emploeeSouthPanel);
+	innerControlPanel.add(projectSouthPanel);
 	emploeeNorthPanel.setLayout(new GridLayout(2,2));
 	projectNorthPanel.setLayout(new GridLayout(2,2));
 	emploeeSouthPanel.setLayout(new GridLayout(1,1));
@@ -127,7 +133,26 @@ class ConjureProject implements ActionListener
 		ProjectPanel panel = new ProjectPanel(project);
 		innerEventsPanel.add(panel.getMainPanel());
 		innerEventsPanel.validate();
+		innerEventsPanel.repaint();
 		projectPanelList.addLast(panel);
+		}
+	}
+
+class ClearCompletedHandler implements ActionListener
+	{
+	public void actionPerformed(ActionEvent event)
+		{
+		for(Iterator<ProjectPanel> it = projectPanelList.iterator(); it.hasNext();)
+			{
+			ProjectPanel current = it.next();
+			if(current.project.isCompleted())
+				{
+				innerEventsPanel.remove(current.getMainPanel());
+				it.remove();
+				}
+			}
+		innerEventsPanel.validate();
+		innerEventsPanel.repaint();
 		}
 	}
 
@@ -207,7 +232,6 @@ void updateUI()
 					for(Iterator<ProjectPanel> it = projectPanelList.iterator(); it.hasNext();)
 						{
 						ProjectPanel current = it.next();
-						//if time is up throw away the panel
 						current.updatePeopleAvailableLabelValue();
 						current.updatePeopleResignedLabelValue();
 						}
@@ -357,6 +381,11 @@ short getPeopleAvailable()
 short getPeopleResigned()
 	{
 	return (short)(hiredTotal - getPeopleAvailable());
+	}
+
+Boolean isCompleted()
+	{
+	return timeRemaining == 0;
 	}
 
 String fetchName()
