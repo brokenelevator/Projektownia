@@ -34,8 +34,8 @@ private JTextField newProjectTimeTextField = new JTextField("0");
 private JLabel newEmploeeLabel = new JLabel("# of people:");
 private JLabel newProjectSizeLabel = new JLabel("# of people needed:");
 private JLabel newProjectTimeLabel = new JLabel("Required time(in s):");
-private JLabel oldEmploeesCountLabel = new JLabel("Old emploees waiting for a new project");
-private JLabel oldEmploeesCountValueLabel = new JLabel("0");
+private JLabel oldEmployeesCountLabel = new JLabel("Old employees waiting for a new project");
+private JLabel oldEmployeesCountValueLabel = new JLabel("0");
 private JLabel candidateCountLabel = new JLabel("New candidates waiting for a job");
 private JLabel candidateCountValueLabel = new JLabel("0");
 private JButton newEmploeeButton = new JButton("Spawn");
@@ -55,12 +55,12 @@ ProjektowniaUI()
 	eventsPanel.add(queueInfoPanel, BorderLayout.SOUTH);
 	eventsPanel.add(innerEventsPanel, BorderLayout.CENTER);
 	queueInfoPanel.setLayout(new GridLayout(2,2));
-	queueInfoPanel.add(oldEmploeesCountValueLabel);
-	oldEmploeesCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	queueInfoPanel.add(oldEmployeesCountValueLabel);
+	oldEmployeesCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(candidateCountValueLabel);
 	candidateCountValueLabel.setHorizontalAlignment(SwingConstants.CENTER);
-	queueInfoPanel.add(oldEmploeesCountLabel);
-	oldEmploeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
+	queueInfoPanel.add(oldEmployeesCountLabel);
+	oldEmployeesCountLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	queueInfoPanel.add(candidateCountLabel);
 	candidateCountLabel.setHorizontalAlignment(SwingConstants.CENTER);	
 	innerEventsPanel.setLayout(new GridLayout(4,2));
@@ -239,7 +239,7 @@ void updateUI()
 				{
 				public void run()
 					{
-					oldEmploeesCountValueLabel.setText(Integer.toString(company.getOldEmploeeQueue().getQueueLength()));
+					oldEmployeesCountValueLabel.setText(Integer.toString(company.getOldEmploeeQueue().getQueueLength()));
 					candidateCountValueLabel.setText(Integer.toString(company.getCandidateQueue().getQueueLength()));
 					for(Iterator<ProjectPanel> it = projectPanelList.iterator(); it.hasNext();)
 						{
@@ -271,7 +271,7 @@ class Projektownia
 {
 private Semaphore oldEmploeeApplications  = new Semaphore(0, true);
 private Semaphore candidateApplications = new Semaphore(0, true);
-private LinkedList<Person> availableEmploees = new LinkedList<Person>();
+private LinkedList<Person> availableEmployees = new LinkedList<Person>();
 
 Semaphore getOldEmploeeQueue()
 	{
@@ -283,9 +283,9 @@ Semaphore getCandidateQueue()
 	return candidateApplications;
 	}
 
-LinkedList<Person> getAvailableEmploeesList()
+LinkedList<Person> getAvailableEmployeesList()
 	{
-	return availableEmploees;
+	return availableEmployees;
 	}
 }
 
@@ -315,7 +315,7 @@ public void run()
 			{
 			return;
 			}
-		employer.getAvailableEmploeesList().addLast(this); //announce you are ready
+		employer.getAvailableEmployeesList().addLast(this); //announce you are ready
 		while(!assigned)
 			{
 			try
@@ -441,7 +441,7 @@ public void run()
 					sleep(5);
 					}
 				catch(InterruptedException e){}
-				Person current = company.getAvailableEmploeesList().pollFirst();
+				Person current = company.getAvailableEmployeesList().pollFirst();
 				try
 					{
 					current.assigned = true;
@@ -462,7 +462,7 @@ public void run()
 					sleep(5);
 					}
 				catch(InterruptedException e){}
-				Person current = company.getAvailableEmploeesList().pollFirst();
+				Person current = company.getAvailableEmployeesList().pollFirst();
 				try
 					{
 					current.assigned = true;
